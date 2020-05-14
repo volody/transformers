@@ -21,12 +21,12 @@ from transformers import TransfoXLConfig, is_tf_available
 
 from .test_configuration_common import ConfigTester
 from .test_modeling_tf_common import TFModelTesterMixin, ids_tensor
-from .utils import CACHE_DIR, require_tf, slow
+from .utils import require_tf, slow
 
 
 if is_tf_available():
     import tensorflow as tf
-    from transformers.modeling_tf_transfo_xl import (
+    from transformers import (
         TFTransfoXLModel,
         TFTransfoXLLMHeadModel,
         TF_TRANSFO_XL_PRETRAINED_MODEL_ARCHIVE_MAP,
@@ -107,7 +107,7 @@ class TFTransfoXLModelTest(TFModelTesterMixin, unittest.TestCase):
                 d_inner=self.d_inner,
                 div_val=self.div_val,
                 n_layer=self.num_hidden_layers,
-                eos_token_ids=self.eos_token_id,
+                eos_token_id=self.eos_token_id,
             )
 
             return (config, input_ids_1, input_ids_2, lm_labels)
@@ -210,7 +210,7 @@ class TFTransfoXLModelTest(TFModelTesterMixin, unittest.TestCase):
     @slow
     def test_model_from_pretrained(self):
         for model_name in list(TF_TRANSFO_XL_PRETRAINED_MODEL_ARCHIVE_MAP.keys())[:1]:
-            model = TFTransfoXLModel.from_pretrained(model_name, cache_dir=CACHE_DIR)
+            model = TFTransfoXLModel.from_pretrained(model_name)
             self.assertIsNotNone(model)
 
 
@@ -364,7 +364,7 @@ class TFTransfoXLModelLanguageGenerationTest(unittest.TestCase):
                     0,
                 ]
             ],
-            dtype=tf.int31,
+            dtype=tf.int32,
         )
         #  In 1991 , the remains of Russian Tsar Nicholas II and his family
         #  ( except for Alexei and Maria ) are discovered .
@@ -570,8 +570,5 @@ class TFTransfoXLModelLanguageGenerationTest(unittest.TestCase):
         # Nicholas II and his family were discovered. The voice of <unk> young son,
         # Tsarevich Alexei Nikolaevich, narrates the remainder of the story.<eos>
 
-        # TODO: add this test when trasnfo-xl-lmhead is implemented
-        with self.assertRaises(NotImplementedError):
-            model.generate(input_ids, max_length=200, do_sample=False)
-            print(expected_output_ids)
-        # self.assertListEqual(output_ids[0].numpy().tolist(), expected_output_ids) TODO: (PVP) to add when transfo-xl is implemented
+        output_ids = model.generate(input_ids, max_length=200, do_sample=False)
+        self.assertListEqual(output_ids[0].numpy().tolist(), expected_output_ids)

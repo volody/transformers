@@ -20,7 +20,7 @@ from transformers import is_torch_available
 
 from .test_configuration_common import ConfigTester
 from .test_modeling_common import ModelTesterMixin, ids_tensor
-from .utils import CACHE_DIR, require_torch, slow, torch_device
+from .utils import require_torch, slow, torch_device
 
 
 if is_torch_available():
@@ -132,7 +132,7 @@ class GPT2ModelTest(ModelTesterMixin, unittest.TestCase):
                 # type_vocab_size=self.type_vocab_size,
                 # initializer_range=self.initializer_range
                 bos_token_id=self.bos_token_id,
-                eos_token_ids=self.eos_token_id,
+                eos_token_id=self.eos_token_id,
             )
 
             head_mask = ids_tensor([self.num_hidden_layers, self.num_attention_heads], 2)
@@ -335,7 +335,7 @@ class GPT2ModelTest(ModelTesterMixin, unittest.TestCase):
     @slow
     def test_model_from_pretrained(self):
         for model_name in list(GPT2_PRETRAINED_MODEL_ARCHIVE_MAP.keys())[:1]:
-            model = GPT2Model.from_pretrained(model_name, cache_dir=CACHE_DIR)
+            model = GPT2Model.from_pretrained(model_name)
             self.assertIsNotNone(model)
 
 

@@ -21,7 +21,7 @@ from transformers import is_torch_available
 
 from .test_configuration_common import ConfigTester
 from .test_modeling_common import ModelTesterMixin, ids_tensor
-from .utils import CACHE_DIR, require_torch, slow, torch_device
+from .utils import require_torch, slow, torch_device
 
 
 if is_torch_available():
@@ -103,7 +103,7 @@ class TransfoXLModelTest(ModelTesterMixin, unittest.TestCase):
                 d_inner=self.d_inner,
                 div_val=self.div_val,
                 n_layer=self.num_hidden_layers,
-                eos_token_ids=self.eos_token_id,
+                eos_token_id=self.eos_token_id,
             )
 
             return (config, input_ids_1, input_ids_2, lm_labels)
@@ -129,10 +129,10 @@ class TransfoXLModelTest(ModelTesterMixin, unittest.TestCase):
 
         def check_transfo_xl_model_output(self, result):
             self.parent.assertListEqual(
-                list(result["hidden_states_1"].size()), [self.batch_size, self.seq_length, self.hidden_size]
+                list(result["hidden_states_1"].size()), [self.batch_size, self.seq_length, self.hidden_size],
             )
             self.parent.assertListEqual(
-                list(result["hidden_states_2"].size()), [self.batch_size, self.seq_length, self.hidden_size]
+                list(result["hidden_states_2"].size()), [self.batch_size, self.seq_length, self.hidden_size],
             )
             self.parent.assertListEqual(
                 list(list(mem.size()) for mem in result["mems_1"]),
@@ -164,18 +164,18 @@ class TransfoXLModelTest(ModelTesterMixin, unittest.TestCase):
             return outputs
 
         def check_transfo_xl_lm_head_output(self, result):
-            self.parent.assertListEqual(list(result["loss_1"].size()), [self.batch_size, self.seq_length])
+            self.parent.assertListEqual(list(result["loss_1"].size()), [self.batch_size, self.seq_length - 1])
             self.parent.assertListEqual(
-                list(result["lm_logits_1"].size()), [self.batch_size, self.seq_length, self.vocab_size]
+                list(result["lm_logits_1"].size()), [self.batch_size, self.seq_length, self.vocab_size],
             )
             self.parent.assertListEqual(
                 list(list(mem.size()) for mem in result["mems_1"]),
                 [[self.mem_len, self.batch_size, self.hidden_size]] * self.num_hidden_layers,
             )
 
-            self.parent.assertListEqual(list(result["loss_2"].size()), [self.batch_size, self.seq_length])
+            self.parent.assertListEqual(list(result["loss_2"].size()), [self.batch_size, self.seq_length - 1])
             self.parent.assertListEqual(
-                list(result["lm_logits_2"].size()), [self.batch_size, self.seq_length, self.vocab_size]
+                list(result["lm_logits_2"].size()), [self.batch_size, self.seq_length, self.vocab_size],
             )
             self.parent.assertListEqual(
                 list(list(mem.size()) for mem in result["mems_2"]),
@@ -210,7 +210,7 @@ class TransfoXLModelTest(ModelTesterMixin, unittest.TestCase):
     @slow
     def test_model_from_pretrained(self):
         for model_name in list(TRANSFO_XL_PRETRAINED_MODEL_ARCHIVE_MAP.keys())[:1]:
-            model = TransfoXLModel.from_pretrained(model_name, cache_dir=CACHE_DIR)
+            model = TransfoXLModel.from_pretrained(model_name)
             self.assertIsNotNone(model)
 
 
